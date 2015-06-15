@@ -27,11 +27,11 @@ import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlWriter;
 import microsoft.exchange.webservices.data.core.XmlAttributeNames;
 import microsoft.exchange.webservices.data.core.XmlElementNames;
-import microsoft.exchange.webservices.data.enumeration.ExchangeVersion;
-import microsoft.exchange.webservices.data.enumeration.XmlNamespace;
-import microsoft.exchange.webservices.data.exception.InvalidOrUnsupportedTimeZoneDefinitionException;
-import microsoft.exchange.webservices.data.exception.ServiceLocalException;
-import microsoft.exchange.webservices.data.exception.ServiceXmlSerializationException;
+import microsoft.exchange.webservices.data.core.enumeration.misc.ExchangeVersion;
+import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
+import microsoft.exchange.webservices.data.core.exception.service.local.InvalidOrUnsupportedTimeZoneDefinitionException;
+import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
+import microsoft.exchange.webservices.data.core.exception.service.local.ServiceXmlSerializationException;
 import microsoft.exchange.webservices.data.property.complex.ComplexProperty;
 
 import java.util.ArrayList;
@@ -75,12 +75,12 @@ public class TimeZoneDefinition extends ComplexProperty implements Comparator<Ti
   /**
    * The name.
    */
-  public String name;
+  protected String name;
 
   /**
    * The id.
    */
-  public String id;
+  protected String id;
 
   /**
    * The periods.
@@ -131,6 +131,18 @@ public class TimeZoneDefinition extends ComplexProperty implements Comparator<Ti
   public TimeZoneDefinition() {
     super();
   }
+  
+  /**
+   * Initializes a new instance of the TimeZoneDefinition class.
+   * 
+   * @param id
+   * @param name
+   */
+  public TimeZoneDefinition(String id, String name) {
+    super();
+    this.id = id;
+    this.name = name;
+  }
 
 
   /**
@@ -139,7 +151,7 @@ public class TimeZoneDefinition extends ComplexProperty implements Comparator<Ti
    * @param timeZonePeriod the time zone period
    * @return A TimeZoneTransitionGroup.
    */
-  private TimeZoneTransitionGroup createTransitionGroupToPeriod(
+  protected TimeZoneTransitionGroup createTransitionGroupToPeriod(
       TimeZonePeriod timeZonePeriod) {
     TimeZoneTransition transitionToPeriod = new TimeZoneTransition(this,
         timeZonePeriod);

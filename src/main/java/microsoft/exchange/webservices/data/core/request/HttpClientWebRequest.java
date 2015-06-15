@@ -24,7 +24,9 @@
 package microsoft.exchange.webservices.data.core.request;
 
 import microsoft.exchange.webservices.data.core.WebProxy;
-import microsoft.exchange.webservices.data.exception.EWSHttpException;
+import microsoft.exchange.webservices.data.core.exception.http.EWSHttpException;
+
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
@@ -50,8 +52,8 @@ import java.util.Map;
 
 
 /**
- * HttpClientWebRequest is used for making request to the server through
- * NTLM Authentication by using Apache HttpClient 3.1 and JCIFS Library.
+ * HttpClientWebRequest is used for making request to the server through NTLM Authentication by using Apache
+ * HttpClient 3.1 and JCIFS Library.
  */
 public class HttpClientWebRequest extends HttpWebRequest {
 
@@ -120,14 +122,13 @@ public class HttpClientWebRequest extends HttpWebRequest {
 
     // Build request configuration.
     // Disable Kerberos in the preferred auth schemes - EWS should usually allow NTLM or Basic auth
-    RequestConfig.Builder requestConfigBuilder = RequestConfig.custom()
-        .setAuthenticationEnabled(true)
-        .setConnectionRequestTimeout(getTimeout())
-        .setConnectTimeout(getTimeout())
-        .setRedirectsEnabled(isAllowAutoRedirect())
-        .setSocketTimeout(getTimeout())
-        .setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.BASIC))
-        .setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.BASIC));
+    RequestConfig.Builder
+        requestConfigBuilder =
+        RequestConfig.custom().setAuthenticationEnabled(true).setConnectionRequestTimeout(getTimeout())
+            .setConnectTimeout(getTimeout()).setRedirectsEnabled(isAllowAutoRedirect())
+            .setSocketTimeout(getTimeout())
+            .setTargetPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.BASIC))
+            .setProxyPreferredAuthSchemes(Arrays.asList(AuthSchemes.NTLM, AuthSchemes.BASIC));
 
     CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
@@ -138,8 +139,10 @@ public class HttpClientWebRequest extends HttpWebRequest {
       requestConfigBuilder.setProxy(proxyHost);
 
       if (proxy.hasCredentials()) {
-        NTCredentials proxyCredentials = new NTCredentials(proxy.getCredentials().getUsername(),
-            proxy.getCredentials().getPassword(), "", proxy.getCredentials().getDomain());
+        NTCredentials
+            proxyCredentials =
+            new NTCredentials(proxy.getCredentials().getUsername(), proxy.getCredentials().getPassword(), "",
+                              proxy.getCredentials().getDomain());
 
         credentialsProvider.setCredentials(new AuthScope(proxyHost), proxyCredentials);
       }
@@ -149,6 +152,20 @@ public class HttpClientWebRequest extends HttpWebRequest {
     if (isAllowAuthentication() && getUsername() != null) {
       NTCredentials webServiceCredentials = new NTCredentials(getUsername(), getPassword(), "", getDomain());
       credentialsProvider.setCredentials(new AuthScope(AuthScope.ANY), webServiceCredentials);
+    }
+    
+    // EWS PreAuthentication uses Basic Access Authentication scheme
+    // http://weblog.west-wind.com/posts/2010/Feb/18/NET-WebRequestPreAuthenticate-not-quite-what-it-sounds-like
+    if (this.isPreAuthenticate() && (getUsername() != null) && (getPassword() != null)) {
+      
+      // The authentication header string format is defined in RFC 1945
+      // http://tools.ietf.org/html/rfc1945#section-11.1
+      String authz = String.format("%s:%s", getUsername(), getPassword());
+      authz = new String(Base64.encodeBase64(authz.getBytes()));
+      authz = String.format("Basic %s", authz);
+      
+      // Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==
+      httpPost.addHeader("Authorization", authz);
     }
 
     httpContext.setCredentialsProvider(credentialsProvider);
@@ -160,8 +177,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the input stream.
    *
    * @return the input stream
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
-   * @throws java.io.IOException
+   * @throws EWSHttpException the EWS http exception
    */
   @Override
   public InputStream getInputStream() throws EWSHttpException, IOException {
@@ -179,7 +195,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the error stream.
    *
    * @return the error stream
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   @Override
   public InputStream getErrorStream() throws EWSHttpException {
@@ -197,7 +213,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the output stream.
    *
    * @return the output stream
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   @Override
   public OutputStream getOutputStream() throws EWSHttpException {
@@ -213,11 +229,10 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the response headers.
    *
    * @return the response headers
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   @Override
-  public Map<String, String> getResponseHeaders()
-      throws EWSHttpException {
+  public Map<String, String> getResponseHeaders() throws EWSHttpException {
     throwIfResponseIsNull();
     Map<String, String> map = new HashMap<String, String>();
 
@@ -249,8 +264,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * java.lang.String)
    */
   @Override
-  public String getResponseHeaderField(String headerName)
-      throws EWSHttpException {
+  public String getResponseHeaderField(String headerName) throws EWSHttpException {
     throwIfResponseIsNull();
     Header hM = response.getFirstHeader(headerName);
     return hM != null ? hM.getValue() : null;
@@ -260,35 +274,33 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the content encoding.
    *
    * @return the content encoding
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   @Override
   public String getContentEncoding() throws EWSHttpException {
     throwIfResponseIsNull();
-    return response.getFirstHeader("content-encoding") != null ?
-        response.getFirstHeader("content-encoding").getValue() :
-        null;
+    return response.getFirstHeader("content-encoding") != null ? response.getFirstHeader("content-encoding")
+        .getValue() : null;
   }
 
   /**
    * Gets the response content type.
    *
    * @return the response content type
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   @Override
   public String getResponseContentType() throws EWSHttpException {
     throwIfResponseIsNull();
-    return response.getFirstHeader("Content-type") != null ?
-        response.getFirstHeader("Content-type").getValue() :
-        null;
+    return response.getFirstHeader("Content-type") != null ? response.getFirstHeader("Content-type")
+        .getValue() : null;
   }
 
   /**
    * Executes Request by sending request xml data to server.
    *
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
-   * @throws java.io.IOException                                  the IO Exception
+   * @throws EWSHttpException    the EWS http exception
+   * @throws java.io.IOException the IO Exception
    */
   @Override
   public int executeRequest() throws EWSHttpException, IOException {
@@ -301,7 +313,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the response code.
    *
    * @return the response code
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   @Override
   public int getResponseCode() throws EWSHttpException {
@@ -313,7 +325,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the response message.
    *
    * @return the response message
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   public String getResponseText() throws EWSHttpException {
     throwIfResponseIsNull();
@@ -323,7 +335,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
   /**
    * Throw if conn is null.
    *
-   * @throws EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   private void throwIfRequestIsNull() throws EWSHttpException {
     if (null == httpPost) {
@@ -341,7 +353,7 @@ public class HttpClientWebRequest extends HttpWebRequest {
    * Gets the request property.
    *
    * @return the request property
-   * @throws microsoft.exchange.webservices.data.exception.EWSHttpException the eWS http exception
+   * @throws EWSHttpException the EWS http exception
    */
   public Map<String, String> getRequestProperty() throws EWSHttpException {
     throwIfRequestIsNull();

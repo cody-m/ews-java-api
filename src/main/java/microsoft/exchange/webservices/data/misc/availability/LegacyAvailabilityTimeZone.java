@@ -26,8 +26,8 @@ package microsoft.exchange.webservices.data.misc.availability;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlReader;
 import microsoft.exchange.webservices.data.core.EwsServiceXmlWriter;
 import microsoft.exchange.webservices.data.core.XmlElementNames;
-import microsoft.exchange.webservices.data.enumeration.DayOfTheWeek;
-import microsoft.exchange.webservices.data.enumeration.XmlNamespace;
+import microsoft.exchange.webservices.data.core.enumeration.property.time.DayOfTheWeek;
+import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
 import microsoft.exchange.webservices.data.misc.TimeSpan;
 import microsoft.exchange.webservices.data.property.complex.ComplexProperty;
 import microsoft.exchange.webservices.data.property.complex.time.TimeZoneDefinition;
@@ -96,9 +96,9 @@ public final class LegacyAvailabilityTimeZone extends ComplexProperty {
 		"GMT-"+formatter.format(this.bias.getHours())+":"+
 		formatter.format(this.bias.getMinutes());
 */
-    TimeZoneDefinition timeZoneDefinition = new TimeZoneDefinition();
-    timeZoneDefinition.id = UUID.randomUUID().toString();
-    timeZoneDefinition.name = "Custom time zone";
+    String timeZoneId = UUID.randomUUID().toString();
+    String timeZoneName = "Custom time zone";
+    TimeZoneDefinition timeZoneDefinition = new TimeZoneDefinition(timeZoneId, timeZoneName);
     return timeZoneDefinition;
   }
 
