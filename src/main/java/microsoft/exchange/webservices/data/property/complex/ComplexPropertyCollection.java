@@ -29,9 +29,9 @@ import microsoft.exchange.webservices.data.core.EwsServiceXmlWriter;
 import microsoft.exchange.webservices.data.core.EwsUtilities;
 import microsoft.exchange.webservices.data.core.ICustomXmlUpdateSerializer;
 import microsoft.exchange.webservices.data.core.service.ServiceObject;
-import microsoft.exchange.webservices.data.enumeration.EditorBrowsableState;
-import microsoft.exchange.webservices.data.enumeration.XmlNamespace;
-import microsoft.exchange.webservices.data.exception.ServiceLocalException;
+import microsoft.exchange.webservices.data.core.enumeration.attribute.EditorBrowsableState;
+import microsoft.exchange.webservices.data.core.enumeration.misc.XmlNamespace;
+import microsoft.exchange.webservices.data.core.exception.service.local.ServiceLocalException;
 import microsoft.exchange.webservices.data.property.definition.PropertyDefinition;
 
 import java.util.ArrayList;
@@ -105,7 +105,7 @@ public abstract class ComplexPropertyCollection
    */
   protected void itemChanged(ComplexProperty complexProperty) {
     EwsUtilities
-        .EwsAssert(complexProperty instanceof ComplexProperty, "ComplexPropertyCollection.ItemChanged",
+        .ewsAssert(complexProperty instanceof ComplexProperty, "ComplexPropertyCollection.ItemChanged",
                    String.format("ComplexPropertyCollection." +
                                  "ItemChanged: the type of " +
                                  "the complexProperty argument " +
@@ -314,9 +314,8 @@ public abstract class ComplexPropertyCollection
    */
   private void internalAdd(TComplexProperty complexProperty,
       boolean loading) {
-    EwsUtilities.EwsAssert(complexProperty != null,
-        "ComplexPropertyCollection.InternalAdd",
-        "complexProperty is null");
+    EwsUtilities.ewsAssert(complexProperty != null, "ComplexPropertyCollection.InternalAdd",
+                           "complexProperty is null");
 
     if (!this.items.contains(complexProperty)) {
       this.items.add(complexProperty);
@@ -354,9 +353,8 @@ public abstract class ComplexPropertyCollection
    * @param index The index.
    */
   protected void internalRemoveAt(int index) {
-    EwsUtilities.EwsAssert(index >= 0 && index < this.getCount(),
-        "ComplexPropertyCollection.InternalRemoveAt",
-        "index is out of range.");
+    EwsUtilities.ewsAssert(index >= 0 && index < this.getCount(),
+                           "ComplexPropertyCollection.InternalRemoveAt", "index is out of range.");
 
     this.internalRemove(this.items.get(index));
   }
@@ -369,9 +367,8 @@ public abstract class ComplexPropertyCollection
    * collection, false otherwise.
    */
   protected boolean internalRemove(TComplexProperty complexProperty) {
-    EwsUtilities.EwsAssert(complexProperty != null,
-        "ComplexPropertyCollection.InternalRemove",
-        "complexProperty is null");
+    EwsUtilities.ewsAssert(complexProperty != null, "ComplexPropertyCollection.InternalRemove",
+                           "complexProperty is null");
 
     if (this.items.remove(complexProperty)) {
       complexProperty.removeChangeEvent(this);
